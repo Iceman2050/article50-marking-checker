@@ -78,11 +78,20 @@ Verdict levels: `PASS` (C2PA/JUMBF manifest or disclosure header),
 python3 -m unittest test_article50_check -v
 ```
 
-Fixtures are generated programmatically (no binary blobs in the repo):
-PNG with fake C2PA JUMBF signature → PASS; PNG without → FAIL;
-PNG with `tEXt` AI marker → PASS (weak); JPEG with APP11 JUMBF → PASS;
-plain JPEG → FAIL; text with disclosure header → PASS; text without → FAIL;
-plus Article 50 duty-mapping checks and CLI exit-code / `--json` tests.
+Two test layers, both stdlib-only:
+
+```bash
+python3 -m unittest test_article50_check -v   # programmatic fixtures + CLI tests
+python3 -m pytest tests/ -q                   # real-file fixtures under tests/fixtures/
+```
+
+`tests/fixtures/` holds real binary files: minimal valid PNG with C2PA
+JUMBF chunk → PASS; minimal plain PNG → FAIL; minimal JPEG with APP11
+JUMBF segment → PASS; minimal plain JPEG (SOI+EOI) → FAIL; text with
+disclosure header → PASS; plain text → FAIL — each checked via
+`check_file()`, plus Article 50 duty-mapping checks and a CLI run over
+the fixtures directory. The legacy root suite additionally covers
+`tEXt`-marker PNG → PASS (weak) and CLI exit-code / `--json` tests.
 
 ## What this tool does NOT do
 
